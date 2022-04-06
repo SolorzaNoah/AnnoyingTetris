@@ -1,6 +1,14 @@
-import javax.swing.JFrame;
-	import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+	import java.awt.Point;
+	import java.awt.event.KeyEvent;
+	import java.awt.event.KeyListener;
+	import java.util.ArrayList;
+	import java.util.Collections;
 
+	import javax.swing.JFrame;
+	import javax.swing.JPanel;
 	public class Tetris extends JPanel {
 
 		private static final long serialVersionUID = 1L;
@@ -112,3 +120,51 @@ import javax.swing.JFrame;
 			}
 			return false;
 		}
+		// Rotate the piece clockwise or counterclockwise
+		public void rotate(int i) {
+			int newRotation = (rotation + i) % 4;
+			if (newRotation < 0) {
+				newRotation = 3;
+			}
+			if (!collidesAt(pieceOrigin.x, pieceOrigin.y, newRotation)) {
+				rotation = newRotation;
+			}
+			repaint();
+		}
+		
+		// Move the piece left or right
+		public void move(int i) {
+			if (!collidesAt(pieceOrigin.x + i, pieceOrigin.y, rotation)) {
+				pieceOrigin.x += i;	
+			}
+			repaint();
+		}
+		
+		// Drops the piece one line or fixes it to the well if it can't drop
+		public void dropDown() {
+			if (!collidesAt(pieceOrigin.x, pieceOrigin.y + 1, rotation)) {
+				pieceOrigin.y += 1;
+			} else {
+				fixToWell();
+			}	
+			repaint();
+		}
+		
+		// Make the dropping piece part of the well, so it is available for
+		// collision detection.
+		public void fixToWell() {
+			for (Point p : Tetraminos[currentPiece][rotation]) {
+				well[pieceOrigin.x + p.x][pieceOrigin.y + p.y] = tetraminoColors[currentPiece];
+			}
+			clearRows();
+			newPiece();
+		}
+		
+		public void deleteRow(int row) {
+			for (int j = row-1; j > 0; j--) {
+				for (int i = 1; i < 11; i++) {
+					well[i][j+1] = well[i][j];
+				}
+			}
+		}
+	
